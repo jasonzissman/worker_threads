@@ -3,7 +3,7 @@ const path = require("path")
 const { createLogger } = require("bunyan")
 const bunyanMiddleware = require("bunyan-middleware")
 const bunyanDebugStream = require("bunyan-debug-stream")
-const { Worker } = require('worker_threads')
+const hashService = require("./hashService");
 
 const logger = createLogger({
   name: "interview",
@@ -24,21 +24,8 @@ const app = express()
 
 app.use(bunyanMiddleware({ logger }))
 
-async function generateHashAsync(workerData) {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker('./src/bcryptHelper.js', { workerData });
-    worker.on('message', resolve);
-    worker.on('error', reject);
-    worker.on('exit', (code) => {
-      if (code !== 0)
-        reject(new Error(`Worker stopped with exit code ${code}`));
-    })
-  })
-}
-
-
 app.get("/generate", async (req, res) => {
-  const hash = await generateHashAsync(req.query.value);
+  const hash = await hashService.generateHashAsync(req.query.value);
   res.send({ hash })
 });
 
