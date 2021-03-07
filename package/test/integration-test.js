@@ -4,14 +4,22 @@ const http = require('http');
 async function issueTimedHttpGet(url, timeTracker) {
     return new Promise((resolve, reject) => {
         timeTracker.startTime = new Date().getTime();
+        console.log(`${new Date()}::: Request issued to ${url}.`);
         http.get(url, (res) => {
             timeTracker.endTime = new Date().getTime();
+            console.log(`${new Date()}::: Response received from ${url}.`);
             resolve(res);
         });
     });
 };
 
-describe('Support for concurrent requests', () => {
+async function sleep(timeMs) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => { resolve(); }, timeMs);
+    });
+}
+
+describe('Problem Case 1 - Support Concurrent Requests', () => {
 
     let theApplicationServer;
 
@@ -20,7 +28,6 @@ describe('Support for concurrent requests', () => {
         theApplicationServer = require('../src/server.js');
         const firstHealthResponse = await issueTimedHttpGet('http://localhost:3000/health', {});
         assert.equal(firstHealthResponse.statusCode, 200);
-        console.log("Successully started");
     });
 
     afterEach(() => {
@@ -29,24 +36,24 @@ describe('Support for concurrent requests', () => {
         }
     });
 
-    it('should support simultaneous requests to two endpoints', async () => {
+    it('should process other requests while /hash endpoint is processing', async () => {
 
-        // 1. Issue request to generate hash (should take ~5 seconds) 
-        // Immediately proceed and do not wait for response
+        // 1. Issue request to generate hash (should take ~5 seconds). Immediately proceed and do not wait for response
         const generateHashTiming = {};
         const promiseHittingHashEndpoint = issueTimedHttpGet('http://localhost:3000/generate?value=myvalue', generateHashTiming);
 
-        // 2. Issue another request to health endpoint
-        // Immediately proceed and do not wait for response
+        // 2. Wait a moment to ensure first request is issued.
+        await sleep(250); //ms
+
+        // 3. Issue another request to health endpoint. Immediately proceed and do not wait for response
         const getHealthTiming = {};
         const promiseHittingHealthEndpoint = issueTimedHttpGet('http://localhost:3000/health', getHealthTiming);
 
-        // 3. Wait for both open requests to finish
+        // 4. Wait for both open requests to finish
         await Promise.all([promiseHittingHashEndpoint, promiseHittingHealthEndpoint]);
 
-        // 4. Assert the health request started later but finished sooner
-        assert.equal(getHealthTiming.startTime >= generateHashTiming.startTime, true);
-        assert.equal(getHealthTiming.startTime < generateHashTiming.endTime, true);
+        // 5. Assert the health request started later but finished sooner
+        assert.equal(getHealthTiming.startTime > generateHashTiming.startTime, true);
         assert.equal(getHealthTiming.endTime < generateHashTiming.endTime, true);
 
     }).timeout(20000);
