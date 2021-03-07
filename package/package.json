@@ -1,0 +1,29 @@
+{
+  "name": "@optum/worker-threads-question",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon src/server"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "bunyan": "^1.8.14",
+    "bunyan-debug-stream": "^2.0.0",
+    "bunyan-middleware": "^1.0.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4",
+    "prettier": "^2.1.2"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "prettier": {
+    "semi": false,
+    "trailingComma": "all",
+    "printWidth": 120
+  }
+}
