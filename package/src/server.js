@@ -33,7 +33,7 @@ app.get("/health", (req, res) => {
   res.send({ status: "healthy" })
 })
 
-app.listen(3000, (err) => {
+module.exports = app.listen(3000, (err) => {
   if (err) {
     logger.error(err)
   }
