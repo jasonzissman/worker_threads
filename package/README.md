@@ -17,3 +17,6 @@ Run the app with `[yarn|npm] start`. Make a request to http://localhost:3000/gen
 With the assumption that bcrypt doesn't have an async implementation, we need it to be non-blocking on Node's main thread. Modify the example app to execute `bcrypt.hashSync` in a worker thread.
 
 LTS Reference: https://nodejs.org/docs/latest-v12.x/api/worker_threads.html
+
+### Integration tests
+Run `npm test` (after installing dev dependencies) to run an integration test which highlights this problem. 
