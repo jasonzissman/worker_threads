@@ -26,7 +26,7 @@ app.use(bunyanMiddleware({ logger }))
 
 app.get("/generate", async (req, res) => {
   const hash = await hashService.generateHashAsync(req.query.value);
-  res.send({ hash })
+  res.send(hash)
 });
 
 app.get("/health", (req, res) => {
